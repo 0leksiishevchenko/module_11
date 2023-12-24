@@ -22,11 +22,11 @@ class Phone(Field):
 
     @property
     def value(self):
-        return self._value
+        return self.__value
 
     @value.setter
     def value(self, new_value):
-        self._value = self.is_valid(new_value)
+        self.__value = self.is_valid(new_value)
 
 class Birthday(Field):
 
@@ -39,11 +39,11 @@ class Birthday(Field):
 
     @property
     def value(self):
-        return self._value
+        return self.__value
 
     @value.setter
     def value(self, new_value):
-        self._value = self.is_valid(new_value)
+        self.__value = self.is_valid(new_value)
 
 class Record:
     def __init__(self, name, birthday=None):
