@@ -15,12 +15,14 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value):
-        super().__init__(value)
+        super().__init__(self.validate_phone(value))
 
     @staticmethod
     def validate_phone(phone):
-        
-        return phone.isdigit() and len(phone) == 10
+        if not phone.isdigit() or len(phone) != 10:
+            raise ValueError("Invalid phone number format. Please enter a 10-digit number.")
+        return phone
+
 
 
 class Birthday(Field):
@@ -28,31 +30,31 @@ class Birthday(Field):
     def __init__(self, value):
         super().__init__(value)
 
-    def validate_birthday(self, birthday_date):
+    @staticmethod
+    def validate_birthday(self, value):
         try:
-            datetime.strptime(birthday_date, "%d-%m-%Y")
+            datetime.strptime(value, "%d-%m-%Y")
             return True
+        
         except ValueError:
+
             return False
 
     
 class Record:
     
     
-    def __init__(self, name, birthday_date = None):
+    def __init__(self, name, birthday = None):
         self.name = Name(name)
         self.phones = []
-        self.birthday_date = None
+        self.birthday = None
 
-        if birthday_date and Birthday.validate_birthday(birthday_date):
-            self.birthday_date = Birthday(birthday_date)
+        if birthday and Birthday.validate_birthday(birthday):
+            self.birthday_date = Birthday(birthday)
 
     def add_phone(self, phone):
-        if Phone.validate_phone(phone):
-            phone_obj = Phone(phone)
-            self.phones.append(phone_obj)
-        else:
-            raise ValueError("Invalide phone number format. Please enter a 10-digit number.") 
+        phone_obj = Phone(phone)
+        self.phones.append(phone_obj) 
 
     def remove_phone(self, phone):
         drop_contact = self.find_phone(phone)
@@ -77,8 +79,18 @@ class Record:
             pass #print(f"Phone {phone} not found in the record.")
 
     def days_to_birthday(self):
-        if self.birthday_date:
+        if self.birthday:
             today = datetime.now()
+            if today > self.birthday:
+                next_birthday = datetime(today.year + 1, self.birthday.value.month, self.birthday.value.day)
+            else:
+                next_birthday = datetime(today.year + 1, self.birthday.value.month, self.birthday.value.day)
+
+            return (next_birthday - today).days
+        
+        return None
+
+
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(contact.value for contact in self.phones)}"
@@ -100,6 +112,10 @@ class AddressBook(UserDict):
                 raise KeyError(f"Record with name {name} not found in the address book.")
         except KeyError:
             pass #print(f"Record with name {name} not found in the address book.")
+
+    def iterator(self, n):
+        for i in range(0, len(self.data), n):
+            yield list(self.data.values())[i:i + n]
         
 
 book = AddressBook()
